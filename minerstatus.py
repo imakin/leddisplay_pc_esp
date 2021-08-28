@@ -14,7 +14,7 @@ def exc(cmd):
 
 def display(text):
   #print(text)
-  exc(f'echo "{text}" | python3 sender.py')
+  exc(f'echo "{text}" | python3 sender_dotmatrix.py')
 
 def pad4(n):
   return pad(n,4,padc=" ")
