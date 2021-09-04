@@ -4,10 +4,14 @@ import time
 import json
 import datetime
 from subprocess import check_output
+import requests
 
 from font import pad
 
-os.chdir("/home/makin/leddisplay_pc_esp")
+wei2eth = 1/(10**18)
+
+os.chdir(os.path.join(os.environ['HOME'],"leddisplay_pc_esp"))
+wallet = os.environ['WALLET']
 
 def exc(cmd):
   return check_output(cmd,shell=True).decode('utf8')
@@ -18,6 +22,23 @@ def display(text):
 
 def pad4(n):
   return pad(n,4,padc=" ")
+
+ONLINE_DATA_LASTFETCH = time.time()
+ONLINE_DATA = 0
+def online_data():
+  #only fetch every 2 minute
+  if (time.time()-ONLINE_DATA_LASTFETCH)>120:
+    ONLINE_DATA_LASTFETCH = time.time()
+    r = requests.get(f'https://api.ethermine.org/miner/{wallet}/currentStats')
+    t = json.loads(r.text)['data']
+    # ~ usdperday = d['usdPerMin']*60*24
+    balance = d['unpaid']
+    eth2usd = t['usdPerMin']/t['coinsPerMin']
+    balanceusd = balance*wei2eth*eth2usd
+    ONLINE_DATA = balanceusd
+    return balanceusd
+  else:
+    return ONLINE_DATA
 
 #store share in each minute timestamp. to find hourly hashrate
 share_timestamp = [0 for i in range(0,60)] #fill 60 index
@@ -80,3 +101,6 @@ while True:
       time.sleep(0.7)
     except:print(v)
   #print(gpus)
+  usd = online_data()
+  usd = round(v*10)/10 #make upto one decimal point
+  display(pad4(usd))
