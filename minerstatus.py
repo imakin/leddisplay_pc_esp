@@ -13,7 +13,7 @@ def exc(cmd):
   return check_output(cmd,shell=True).decode('utf8')
 
 def display(text):
-  #print(text)
+  print(text)
   exc(f'echo "{text}" | python3 sender_dotmatrix.py')
 
 def pad4(n):
@@ -63,7 +63,7 @@ while True:
   #show current total shares
   display(pad4(share_timestamp[menit]))
   time.sleep(1)
-  print(share_timestamp)
+  #print(share_timestamp)
   #save to file 
   with open("share_timestamp.json","w") as f:
     f.write(json.dumps({'share_timestamp':share_timestamp}))
