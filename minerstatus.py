@@ -23,16 +23,18 @@ def display(text):
 def pad4(n):
   return pad(n,4,padc=" ")
 
-ONLINE_DATA_LASTFETCH = time.time()
+ONLINE_DATA_LASTFETCH = time.time()-120
 ONLINE_DATA = 0
 def online_data():
   #only fetch every 2 minute
+  global ONLINE_DATA
+  global ONLINE_DATA_LASTFETCH
   if (time.time()-ONLINE_DATA_LASTFETCH)>120:
     ONLINE_DATA_LASTFETCH = time.time()
     r = requests.get(f'https://api.ethermine.org/miner/{wallet}/currentStats')
     t = json.loads(r.text)['data']
-    # ~ usdperday = d['usdPerMin']*60*24
-    balance = d['unpaid']
+    # ~ usdperday = t['usdPerMin']*60*24
+    balance = t['unpaid']
     eth2usd = t['usdPerMin']/t['coinsPerMin']
     balanceusd = balance*wei2eth*eth2usd
     ONLINE_DATA = balanceusd
@@ -102,5 +104,6 @@ while True:
     except:print(v)
   #print(gpus)
   usd = online_data()
-  usd = round(v*10)/10 #make upto one decimal point
+  print(usd)
+  usd = round(usd*10)/10 #make upto one decimal point
   display(pad4(usd))
