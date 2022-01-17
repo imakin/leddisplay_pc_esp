@@ -27,7 +27,7 @@ void setup_oled() {
     Serial.println(("SSD1306 allocation failed"));
   }
   oled.clearDisplay();
-  oled.setTextSize(1);      // Normal 1:1 pixel scale
+  oled.setTextSize(5);      // Normal 1:1 pixel scale
   oled.setTextColor(SSD1306_WHITE); // Draw white text
   oled.setCursor(0, 0);     // Start at top-left corner
   oled.cp437(true);         // Use full 256 char 'Code Page 437' font
@@ -53,15 +53,28 @@ void setup_dotmatrix() {
 void loop() {
   if (Serial.available()>0) {
     //if serial string input started with whitespace, it is printed on oled,
-    //oled max char is 168 
+    //or if 1st charracter is 1digit number representing fontsize 1~5 AND 2nd charracter is whitespace
+    //fontsize 1 oled max char is 168 
     String value_sequence = Serial.readStringUntil('\n');
-    if (value_sequence.substring(0,1)==" ") {
+    if (value_sequence.length()<2) {
+      return; //loop(), continue 
+    }
+    uint8_t head0 = value_sequence.charAt(0);
+    uint8_t head1 = value_sequence.charAt(1);
+    if ((head0==' ') ||
+      (head1==' ')
+    ) {
       //print to oled mode
       oled.clearDisplay();
       oled.setCursor(0, 0);
-      uint8_t i=0;
+      uint8_t i=1;//if first char is " " next substring is the text
+      if (head0>='1') {
+        oled.setTextSize(head0-'0');
+        //if first char is font size, 2ndchar " ", next substring is the text
+        i = 2;
+      }
       int length = value_sequence.length();
-      for (i=0;i<length;i++) {
+      for (;i<length;i++) { //skip the " " header [index0]
         oled.write(value_sequence.charAt(i));
       }
       oled.display();
